@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@types/fabric": "^5.3.6"
+  }
+}

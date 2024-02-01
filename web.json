@@ -1,0 +1,53 @@
+{
+    "nodes": [
+        { 
+            "id": "0",
+            "type": "destination",
+            "nearIds" : ["1", "2", "3"],
+            "dists": [3,3,3],
+            "extraParams": [false],
+            "priv": false
+        },
+        { 
+            "id": "1",
+            "type": "destination",
+            "nearIds" : ["0", "2", "5"],
+            "dists": [3,2,5],
+            "extraParams": [false],
+            "priv": false
+        },
+        { 
+            "id": "2",
+            "type": "passage",
+            "nearIds" : ["0","1","3","4","5"],
+            "dists": [3,2,4,3,4],
+            "extraParams": [],
+            "priv": false
+        },
+        { 
+            "id": "3",
+            "type": "destination",
+            "nearIds" : ["0","2","4"],
+            "dists": [0],
+            "extraParams": [false],
+            "priv": false
+        },
+        { 
+            "id": "4",
+            "type": "destination",
+            "nearIds" : ["2","3","5"],
+            "dists": [3,5,3],
+            "extraParams": [false],
+            "priv": false
+        },
+        { 
+            "id": "5",
+            "type": "destination",
+            "nearIds" : ["1", "2", "4"],
+            "dists": [5,4,3],
+            "extraParams": [false],
+            "priv": false
+        }
+    ]
+}
+    
