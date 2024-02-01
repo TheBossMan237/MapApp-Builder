@@ -1,9 +1,24 @@
 const can = new fabric.Canvas("Can", {
     backgroundColor: "white"
 });
+const ContextMenu = document.getElementById("Context-Menu");
 let IsPanning = false;
 let NumMouseDown = 0;
+let ScaleFactor = 0;
+let ContextMenuCreated = false;
+document.addEventListener("contextmenu", function (ev) {
+    ev.preventDefault();
+    if (ev.target.classList.contains("upper-canvas") || ev.target.clientList.contains("Context-Element")) {
+        ContextMenu.style.display = "grid";
+        ContextMenuCreated = true;
+        if (ev.clientX > window.innerWidth / 2) {
+        }
+        ContextMenu.style.left = (ev.clientX > window.innerWidth / 2 ? ev.clientX - 200 : ev.clientX) + "px";
+        ContextMenu.style.top = ev.clientY + "px";
+    }
+});
 can.on("mouse:down", function (opt) {
+    console.log(opt.e);
     if (IsPanning) {
         this.isdragging = true;
         this.selection = false;
@@ -22,6 +37,9 @@ can.on("mouse:down", function (opt) {
         this.requestRenderAll();
         this.lastPosX = ev.e.clientX;
         this.lastPosY = ev.e.clientY;
+    }
+    if (ContextMenuCreated) {
+        ContextMenu.style.display = "none";
     }
 }).on("mouse:wheel", ev => {
     var delta = ev.e.deltaY;
@@ -45,7 +63,7 @@ document.addEventListener("keydown", ev => {
                 IsPanning = !IsPanning;
                 break;
             case "b":
-                let ScaleFactor = 1 / can.getZoom();
+                ScaleFactor = 1 / can.getZoom();
                 let NewBuilding = new fabric.Rect({
                     left: 100,
                     top: 100,
@@ -56,7 +74,8 @@ document.addEventListener("keydown", ev => {
                 can.add(NewBuilding);
                 break;
             case "c":
-                fabric.util.snapp;
+                ScaleFactor = 1 / can.getZoom();
+                let Building = new fabric.Circle({});
         }
     }
     else {
