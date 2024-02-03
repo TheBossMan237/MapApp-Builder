@@ -6,9 +6,9 @@
     <title>Document</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./Public/css/Main.css">
-    
+    <link rel="stylesheet" href="./Public/css/Context-Menu.css">
 </head>
 <body>
     <script src="./Public/lib/Fabric.js"></script>
@@ -20,12 +20,17 @@
     
     <canvas width="1920" height="1080" id="Can"></canvas>
     <div class="Footer"></div>
-    
-    <div id="Context-Menu" class="Context-Element">
-        <div class="Options" class="Context-Element">
+    <div id="Context-Menu" class="HideContextMenu ToFarLeft">
+        <button class="ContextMenuItem">
+            Add
+        </button>
+        <button class="ContextMenuItem">
+            Navigate
+        </button>
+        <button></button>
 
-        </div>
     </div>
+    <script src="./build/Context-Menu.js"></script>
     <script src="./build/Main.js"></script>
 </body>
 </html>

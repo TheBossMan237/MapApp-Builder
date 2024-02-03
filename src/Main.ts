@@ -22,44 +22,25 @@ interface jsonNode{
 
 
 const can = new fabric.Canvas("Can", {
-    backgroundColor : "white"
+    backgroundColor : "white",
 })
-const ContextMenu = document.getElementById("Context-Menu")
 let IsPanning = false;
-let NumMouseDown = 0;
 let ScaleFactor = 0;
-let ContextMenuCreated = false;
 
 document.addEventListener("contextmenu", function(ev : any) {
     ev.preventDefault();
-    if(ev.target.classList.contains("upper-canvas") || ev.target.clientList.contains("Context-Element")) {
-        
-        ContextMenu.style.display = "grid"
-        ContextMenuCreated = true;
-        if(ev.clientX > window.innerWidth / 2) {
-            
-        }
-        ContextMenu.style.left = (ev.clientX > window.innerWidth / 2 ? ev.clientX - 200 : ev.clientX) +  "px" 
-        ContextMenu.style.top = ev.clientY + "px"
-    }
-})
 
+})
 can.on("mouse:down", function(opt) {
-    console.log(opt.e);
     if(IsPanning) {
         this.isdragging = true;
         this.selection = false;
         this.lastPosX = opt.e.clientX;
         this.lastPosY = opt.e.clientY;
     } else {
-        
-        
-        
         this.isdragging = false;
         this.selection = true;
     }
-
-    NumMouseDown = NumMouseDown < 2 ? NumMouseDown + 1 : 0;
 }).on("mouse:move", function(ev) {
     if(IsPanning && ev.e.buttons == 1) {
         this.viewportTransform[4] += ev.e.clientX - this.lastPosX;
@@ -67,9 +48,6 @@ can.on("mouse:down", function(opt) {
         this.requestRenderAll()
         this.lastPosX = ev.e.clientX;
         this.lastPosY = ev.e.clientY;
-    }
-    if(ContextMenuCreated) {
-        ContextMenu.style.display = "none"
     }
 
 }).on("mouse:wheel", ev => {
@@ -81,47 +59,61 @@ can.on("mouse:down", function(opt) {
     can.setZoom(zoom);
     ev.e.preventDefault();
     ev.e.stopPropagation();
+}).on("object:scaling", function(opt) {
+    console.log();
+    
 })
 
 document.addEventListener("keypress", ev => {
-    
+
 })
+
+
+
+
+
+
+const Keybinds = {
+    "g" : function() {
+        IsPanning = !IsPanning
+    },
+    "Control+C" : function(ev : KeyboardEvent) {
+
+    },    
+    "Control+V":function(ev : KeyboardEvent) {
+
+    },
+    "b" : function(ev : KeyboardEvent) {
+        const ZoomFactor = 1 / can.getZoom();
+        const Building = new fabric.Textbox("Building 1", {
+            fontSize : 32 * ZoomFactor,
+            width : 100 * ZoomFactor,
+            height : 100 * ZoomFactor,
+            textAlign : "center",
+        })
+
+        can.add(Building);
+    } 
+
+}
+
+
+
+
+
+
+
 
 
 
 
 document.addEventListener("keydown", ev => {
-    console.log(ev.ctrlKey);
-    
-    
-    if(ev.key.length == 1 && !ev.repeat && !ev.ctrlKey) {
-        switch(ev.key) {
-            case "g": IsPanning = !IsPanning; break;
-            case "b": 
-                ScaleFactor = 1 / can.getZoom();
-                let NewBuilding = new fabric.Rect({
-                    left : 100,
-                    top : 100,
-                    width : 300 * ScaleFactor,
-                    height : 300 * ScaleFactor,
-                    backgroundColor:"black"
-                })
-                can.add(NewBuilding)
-                break;
-            case "c":
-                ScaleFactor = 1 / can.getZoom();
-                let Building = new fabric.Circle({
 
-                })
-        }
-    } else {
-        switch(ev.key) {
-            case "Backspace":
-                if(can.selection) {
-                    
-                    can.remove(can.getActiveObject())
-                }
-                
+    if(ev.key.length == 1) {
+        let Keybind = (ev.ctrlKey?"Control+":"")+(ev.shiftKey?"Shift+":"")+(ev.altKey?"Alt+":"")+ev.key.toLowerCase()
+        console.log(Keybind);
+        if(Keybinds[Keybind]) {
+            Keybinds[Keybind](ev);
         }
     }
     

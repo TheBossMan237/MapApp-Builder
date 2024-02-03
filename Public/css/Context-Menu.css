@@ -1,0 +1,17 @@
+#Context-Menu:not(.ContextMenuHidden) {
+    pointer-events: none;
+    border : 1px solid black;
+    width : 400px;
+    height : 300px;
+    position: absolute;
+    display: grid;
+    grid-template-columns: 200px 200px;
+    grid-auto-rows : 50px;
+}
+#ContextMenu:not(.Overflow-Left) {
+    grid-template-areas: repeat(222 , "Main");
+}
+.ContextMenuItem {
+    pointer-events: all;
+    grid-column: 2;
+}
