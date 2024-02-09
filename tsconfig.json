@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "outDir" : "./build",
+        "outDir" : "./Public/js",
         "target": "ESNext"
     },
-    "include": ["./src/*.ts"]
+    "include": ["typescript/Context-Menu.ts"]
 }
