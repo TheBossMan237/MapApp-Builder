@@ -5,15 +5,23 @@
     pointer-events: none;
     display: grid;
     grid-template-columns: auto;
+    grid-auto-rows : 22px;
     border : 1px solid black;
     width : 200px;
     height : 300px;
 
 }
-#ContextMenu *{
+#ContextMenu > span{
     margin : 0;
     padding : 0;
     pointer-events: all;
+    color : black;
+    font-size : 17.5px;
+    font-family: Inter;
+}
+#ContextMenu > span:hover {
+    cursor: pointer;
+    background-color: gray;
 }
 .HideContextMenu {
     display: none;
