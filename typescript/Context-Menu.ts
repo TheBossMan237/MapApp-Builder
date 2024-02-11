@@ -3,6 +3,7 @@ interface MouseEV extends MouseEvent {
     target : HTMLElement | undefined
 } 
 namespace Main {
+    const Keybinds = {};
     const BuildingObjects = {
         "Main Building" : []
     }
@@ -31,10 +32,15 @@ namespace Main {
         can.setWidth(window.innerWidth);
         can.setHeight(window.innerHeight);
     }
+    document.addEventListener("keydown", ev => {
+
+    })
 }
 namespace ContextMenu {
+    let ContextMenuIsOver_Element : fabric.Object;
     let ContextMenuIsOver : string;
     let TargetMenu : HTMLElement;
+    let IsNewContext : boolean;
     interface I_Actions {
         [TargetName : string | undefined] : [[string, HTMLElement]]
     }
@@ -49,16 +55,18 @@ namespace ContextMenu {
         TargetMenu.classList.remove("HideContextMenu");
     }
     const Actions : I_Actions = {};
-    export function CreateAction(Context : string, name : string, func : (target : string) => any) {
+    export function CreateAction(Context : string, name : string, func : (target : fabric.Object) => any) {
         let elem = document.createElement("div");
         elem.classList.add("Context-Menu-Item")
         elem.innerText = name;
         elem.onclick = () => {
-            func(ContextMenuIsOver)
+            func(ContextMenuIsOver_Element)
+            HideContextMenu();
         }
         if(!Actions[Context]) Actions[Context] = [[name, elem]]
         else Actions[Context].push([name, elem]);
         console.log(Actions);
+        
         
 
 
@@ -71,7 +79,7 @@ namespace ContextMenu {
         
         document.body.appendChild(TargetMenu)
         Main.can.on("mouse:down",function(opt) {
-            
+            ContextMenuIsOver_Element = opt.target    
             if(opt.button == 3) {
                 let ev = opt.e;
                 let x = opt.e.clientX
@@ -84,15 +92,12 @@ namespace ContextMenu {
                     ContextMenuIsOver = opt.target.name;
                 } else ContextMenuIsOver = "Can";
                 if(Actions[ContextMenuIsOver]) {
-                    for(const e of TargetMenu.children) {
-                        TargetMenu.removeChild(e);
-                    }
+                    let inital = Array.from(TargetMenu.children);
                     for(const Action of Actions[ContextMenuIsOver]) {
-                        TargetMenu.appendChild(Action[1])
-                        
-                        
+                        TargetMenu.appendChild(Action[1])  
                     }
-                }
+                    for(const e of inital) {TargetMenu.removeChild(e);}
+                } 
                 
                 if(window.innerWidth - TargetMenu.clientWidth - x < 0) {
                     x -= TargetMenu.clientWidth;
@@ -109,13 +114,18 @@ namespace ContextMenu {
                 HideContextMenu();
             }
 
+        }).on("object:scaling", function(opt)  {
+            console.log(opt.target.name);
+            
         })
-        document.addEventListener("mousedown", (ev : MouseEV) => {
-            if(ev.target == TargetMenu && ev.buttons == 3) ev.preventDefault()
-        })
-
+        document.addEventListener("contextmenu", (ev : MouseEV) => {
+            if(ev.target.parentElement == TargetMenu) ev.preventDefault();
+            
+            })
         TargetMenu.classList.add("HideContextMenu");
+            
     }
+
 }
 Main.Init();
 ContextMenu.CreateAction("Can","Create Building", () => {
@@ -129,9 +139,13 @@ ContextMenu.CreateAction("Can","Create Building", () => {
     elem.name = "Building"
     Main.can.add(elem);
 })
-
+ContextMenu.CreateAction("Building", "Delete Building", (target) => {
+    Main.can.remove(target);
+})
 ContextMenu.CreateAction("Building", "Rename Building", (target) => {
-    console.log(target);
+})
+ContextMenu.CreateAction("Building", "Enter Building", (target) => {
+
 })
 
 
