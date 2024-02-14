@@ -9,15 +9,46 @@ namespace Utils {
         if(val > max) val = max;
         return val;
     }
+    export class Rect {
+        constructor(public x : number, public y : number, public width : number, public height : number) {}
+    }
+    export class Point {
+        constructor(public x : number, public y : number) {
+            
+        }
+    }
 }
 
 
 
-
-
-namespace Main {
+namespace Grid {
     export let CellSize = 10;
+    let GridStyle = {
+        stroke : "gray",
+        strokeWidth : CellSize / 10
+    }
+    export const GridLines = [];
+    export let GridElement : fabric.Group;
+    export let GridDim : Utils.Rect;
+    export function CreateGrid() {
+        for(let i = 0; i < window.innerWidth; i+=CellSize) {
+            let elem = new fabric.Line([i, 0, i, window.innerHeight], GridStyle)
+            GridLines.push(elem);
+        }
+        for(let i = 0; i < window.innerHeight; i += CellSize) {
+            let elem = new fabric.Line([0, i, window.innerWidth, i], GridStyle)
+            GridLines.push(elem);
+        }
+        Main.can.add(new fabric.Group(GridLines, {
+            selectable : false,
+            hoverCursor : "cursor",
+            name : "Can"
+        }))
 
+
+    }
+}
+namespace Main {
     export function NewShortcut(Shortcut : string, func : () => {}) {
         Shortcuts[Shortcut] = func;
     }
@@ -28,29 +59,10 @@ namespace Main {
     const Buildings = {};
     const GridLines = [];
     let InitCalled = false;
-    let GridLineStyle  = {
-        stroke : "gray",
-        strokeWidth : CellSize / 10  
-    }
     export function ResizeGrid() {
         
     }
-    export function CreateGrid() {
-        for(let i = 0; i < window.innerWidth; i+=CellSize) {
-            let elem = new fabric.Line([i, 0, i, window.innerHeight], GridLineStyle)
-            GridLines.push(elem);
-        }
-        for(let i = 0; i < window.innerHeight; i += CellSize) {
-            let elem = new fabric.Line([0, i, window.innerWidth, i], GridLineStyle)
-            GridLines.push(elem);
-        }
-        let GridElem = new fabric.Group(GridLines, {
-            selectable : false, 
-            hoverCursor : "cursor",
-            name : "Can" //Name is "can" becuase it allowes the user to click througn it
-        })
-        can.add(GridElem);
-    }
+
 
 
 
@@ -67,15 +79,7 @@ namespace Main {
             fireRightClick : true,
             fireMiddleClick : true,
         })
-
-
-
-
-
-
-
-
-        CreateGrid();
+        Grid.CreateGrid()
         //canvas Events 
         can.on("mouse:wheel", function(opt) {
             var delta = opt.e.deltaY
@@ -85,7 +89,7 @@ namespace Main {
             can.zoomToPoint({x : opt.e.offsetX, y : opt.e.offsetY}, zoom)
             opt.e.preventDefault();
             opt.e.stopPropagation();
-        })
+        }).on("mouse:down", ContextMenu.MouseDownEV     )
 
         //Window resizing 
         let TimerID = undefined
@@ -112,8 +116,12 @@ namespace Main {
     })
 }
 namespace ContextMenu {
+
+
+
     let ContextMenuIsOver_Element : fabric.Object;
     let ContextMenuIsOver_Name : string;
+    let ContextMenuIsOver_Coords = new Utils.Point(0, 0);
     let TargetMenu : HTMLElement;
     
     
@@ -140,8 +148,52 @@ namespace ContextMenu {
     export function ShowContextMenu() {
         TargetMenu.classList.remove("HideContextMenu");
     }
+    export function MouseDownEV(opt : fabric.IEvent<MouseEvent>) {
+        ContextMenuIsOver_Element = opt.target    
+        if(opt.e.buttons == 4) {
+            opt.e.preventDefault();
+            LastClientX = opt.e.clientX;
+            LastClientY = opt.e.clientY;
+            IsPanning = true;
+        }
+        if(opt.button == 3) {
+            let ev = opt.e;
+            let x = opt.e.clientX
+            let y = ev.clientY;
+
+
+
+            
+            if(opt.target) {
+                ContextMenuIsOver_Name = opt.target.name;
+            } else ContextMenuIsOver_Name = "Can";
+            if(Actions[ContextMenuIsOver_Name]) {
+                let inital = Array.from(TargetMenu.children);
+                for(const e of inital) {TargetMenu.removeChild(e);}
+                for(const Action of Actions[ContextMenuIsOver_Name]) {
+                    TargetMenu.appendChild(Action[1])  //Actions 1 is the element 
+                }
+
+            } else {return;}
+            
+            if(window.innerWidth - TargetMenu.clientWidth - x < 0) {
+                x -= TargetMenu.clientWidth;
+            }
+            if(window.innerHeight - TargetMenu.clientHeight - y < 0) {
+                y -= TargetMenu.clientHeight;
+            }
+            TargetMenu.style.left = x + "px";
+            TargetMenu.style.top = y + "px";
+            TargetMenu.classList.toggle("HideContextMenu")
+            ShowContextMenu();
+            
+        } else {
+            HideContextMenu();
+        }
+    }
     const Actions : I_Actions = {};
     export function CreateAction(Context : string, name : string, func : (target : fabric.Object) => any) {
+        
         let elem = document.createElement("span");
         elem.classList.add("Context-Menu-Item")
         elem.innerText = name;
@@ -162,81 +214,38 @@ namespace ContextMenu {
         TargetMenu = document.getElementById("ContextMenu");
         
         document.body.appendChild(TargetMenu)
-        Main.can.on("mouse:down",function(opt) {
-
-            ContextMenuIsOver_Element = opt.target    
-            if(opt.e.buttons == 4) {
-                opt.e.preventDefault();
-                IsPanning = true;
-                LastClientX = opt.e.clientX;
-                LastClientY = opt.e.clientY
-                
-            
-            }
-            if(opt.button == 3) {
-                let ev = opt.e;
-                let x = opt.e.clientX
-                let y = ev.clientY;
-
-
-
-                
-                if(opt.target) {
-                    ContextMenuIsOver_Name = opt.target.name;
-                } else ContextMenuIsOver_Name = "Can";
-                if(Actions[ContextMenuIsOver_Name]) {
-                    let inital = Array.from(TargetMenu.children);
-                    for(const e of inital) {TargetMenu.removeChild(e);}
-                    for(const Action of Actions[ContextMenuIsOver_Name]) {
-                        TargetMenu.appendChild(Action[1])  //Actions 1 is the element 
-                    }
-
-                } else {return;}
-                
-                if(window.innerWidth - TargetMenu.clientWidth - x < 0) {
-                    x -= TargetMenu.clientWidth;
-                }
-                if(window.innerHeight - TargetMenu.clientHeight - y < 0) {
-                    y -= TargetMenu.clientHeight;
-                }
-                TargetMenu.style.left = x + "px";
-                TargetMenu.style.top = y + "px";
-                TargetMenu.classList.toggle("HideContextMenu")
-                ShowContextMenu();
-                
-            } else {
-                HideContextMenu();
-            }
-
-        })
         
         Main.can.on("mouse:up", function(opt) {
-            console.log(opt.button)
             if(opt.button == 2) IsPanning = false;
         })
         Main.can.on("object:moving", function(opt) {
-            let left = Math.round(opt.target.left / Main.CellSize)
-            let top = Math.round(opt.target.top / Main.CellSize)
+
+            let left = Math.round(opt.target.left / Grid.CellSize)
+            let top = Math.round(opt.target.top / Grid.CellSize)
             opt.target.set({
-                left : left * Main.CellSize,
-                top : top * Main.CellSize
+                left : left * Grid.CellSize,
+                top : top * Grid.CellSize
             }).setCoords();
         })
         Main.can.on("mouse:move", function(opt) {
-            if(IsPanning) {
+            if(IsPanning) { 
                 let ev = opt.e;
                 var vpt = Main.can.viewportTransform;
+                
                 vpt[4] += ev.clientX - LastClientX
                 vpt[5] += ev.clientY - LastClientY;
                 Main.can.requestRenderAll()
                 LastClientX = ev.clientX;
                 LastClientY = ev.clientY; 
+                
             }
         })
-        Main.can.on("object:scaling", function(opt) {
-            console.log(opt.target.width);
+        Main.can.on("object:scaling", function(opt) {   
+            console.log(opt.target.scaleX);
+            
             opt.target.set({
-                scaleX : Math.ceil(opt.target.scaleX)
+                scaleX : opt.target.scaleX,
+                
             })
         })
         document.addEventListener("contextmenu", (ev : MouseEV) => {
@@ -260,8 +269,8 @@ Main.Init();
 
 ContextMenu.CreateAction("Can","Create Building", (target) => {
     let elem = new fabric.Rect({
-        width : Main.CellSize,
-        height : Main.CellSize,
+        width : Grid.CellSize,
+        height : Grid.CellSize,
         lockUniScaling : true,  
     })
     
