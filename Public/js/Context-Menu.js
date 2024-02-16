@@ -32,6 +32,31 @@ var Utils;
     }
     Utils.Point = Point;
 })(Utils || (Utils = {}));
+var Popup;
+(function (Popup) {
+    let Popup_Elems = {};
+    function GetPopup(name, id) {
+        let popup = document.getElementById(id);
+        popup.classList.add("Popup");
+        popup.PopupLoaded = true;
+        Popup_Elems[name] = popup;
+    }
+    Popup.GetPopup = GetPopup;
+    function Show(name) {
+        let elem = Popup_Elems[name];
+        if (!elem)
+            return;
+        elem.style.display = "none";
+    }
+    Popup.Show = Show;
+    function Hide(name) {
+        let elem = Popup_Elems[name];
+        if (!elem)
+            return;
+        elem.style.display = "block";
+    }
+    Popup.Hide = Hide;
+})(Popup || (Popup = {}));
 var Grid;
 (function (Grid) {
     Grid.CellSize = 10;
@@ -128,11 +153,11 @@ var ContextMenu;
     let LastClientX = 0;
     let LastClientY = 0;
     function HideContextMenu() {
-        TargetMenu.classList.add("HideContextMenu");
+        TargetMenu.classList.add("hidden");
     }
     ContextMenu.HideContextMenu = HideContextMenu;
     function ShowContextMenu() {
-        TargetMenu.classList.remove("HideContextMenu");
+        TargetMenu.classList.remove("hidden");
     }
     ContextMenu.ShowContextMenu = ShowContextMenu;
     function MouseDownEV(opt) {
@@ -172,7 +197,7 @@ var ContextMenu;
             }
             TargetMenu.style.left = x + "px";
             TargetMenu.style.top = y + "px";
-            TargetMenu.classList.toggle("HideContextMenu");
+            TargetMenu.classList.toggle("hidden");
             ShowContextMenu();
         }
         else {
@@ -252,3 +277,4 @@ ContextMenu.CreateAction("Building", "Rename Building", (target) => {
 });
 ContextMenu.CreateAction("Building", "Enter Building", (target) => {
 });
+Popup.GetPopup("Size", "GridSize");

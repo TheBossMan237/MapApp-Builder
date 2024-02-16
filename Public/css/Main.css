@@ -36,3 +36,9 @@ h1,h2 {
     color : white;
     margin : 0;
 }
+.Popup {
+    position: absolute;
+}
+.Hidden {
+    display: none;
+}

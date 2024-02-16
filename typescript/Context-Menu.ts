@@ -20,6 +20,28 @@ namespace Utils {
 }
 
 
+namespace Popup {
+    interface PopupElem extends HTMLElement {PopupLoaded : boolean} //Make's Typescript happy
+    interface I_PopupElems {[key : string] : PopupElem}
+    let Popup_Elems : I_PopupElems= {};
+    export function GetPopup(name : string, id : string) {
+        let popup : PopupElem = <any>document.getElementById(id);
+        popup.classList.add("Popup");
+        popup.PopupLoaded = true;
+        Popup_Elems[name] = popup;
+    }
+    export function Show(name : string) {
+        let elem = Popup_Elems[name];
+        if(!elem) return;
+        elem.style.display = "none";
+    }
+    export function Hide(name : string) {
+        let elem = Popup_Elems[name];
+        if(!elem) return;
+        elem.style.display = "block"
+    }
+
+}
 
 namespace Grid {
     export let CellSize = 10;
@@ -143,10 +165,10 @@ namespace ContextMenu {
 
 
     export function HideContextMenu() {
-        TargetMenu.classList.add("HideContextMenu")
+        TargetMenu.classList.add("hidden")
     }
     export function ShowContextMenu() {
-        TargetMenu.classList.remove("HideContextMenu");
+        TargetMenu.classList.remove("hidden");
     }
     export function MouseDownEV(opt : fabric.IEvent<MouseEvent>) {
         ContextMenuIsOver_Element = opt.target    
@@ -184,7 +206,7 @@ namespace ContextMenu {
             }
             TargetMenu.style.left = x + "px";
             TargetMenu.style.top = y + "px";
-            TargetMenu.classList.toggle("HideContextMenu")
+            TargetMenu.classList.toggle("hidden")
             ShowContextMenu();
             
         } else {
@@ -287,6 +309,6 @@ ContextMenu.CreateAction("Building", "Rename Building", (target) => {
 ContextMenu.CreateAction("Building", "Enter Building", (target) => {
 
 })
-
+Popup.GetPopup("Size", "GridSize");
 
 
