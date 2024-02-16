@@ -1,4 +1,4 @@
-#ContextMenu:not(.HideContextMenu) 
+#ContextMenu:not(.Hidden) 
 {
     background-color: white;
     position: absolute;

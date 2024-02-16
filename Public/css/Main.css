@@ -10,6 +10,7 @@ body {
     margin : 0;
 }
 .Header {
+    color : white;
     justify-items: center;
     align-items : center;
     column-gap : 10px;
@@ -31,14 +32,7 @@ body {
     align-self : center;
     justify-self: center;
 }
-h1,h2 {
-
-    color : white;
-    margin : 0;
-}
-.Popup {
-    position: absolute;
-}
+h1,h2 {margin : 0;}
 .Hidden {
     display: none;
 }
