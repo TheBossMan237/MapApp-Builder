@@ -1,6 +1,12 @@
 let LastClientX = 0;
 let LastClientY = 0;
 let IsPanning = false;
+let zoom = 1;
+/**`1 / zoom` used for getting the position of thigns with zoom in consideration*/
+let InverseZoom = 1;
+
+
+
 const can = new fabric.Canvas("Can", {
     backgroundColor : "white",
     width : 500,
@@ -11,27 +17,13 @@ const can = new fabric.Canvas("Can", {
 })
 
 can.on("mouse:wheel", function(opt) {
-
     var delta = opt.e.deltaY
-    var zoom = can.getZoom();
     zoom *= .999 ** delta;
+    InverseZoom = 1 / zoom;
     zoom = clamp(0.5, zoom, 2);
     can.zoomToPoint({x : opt.e.offsetX, y : opt.e.offsetY}, zoom)
-
     opt.e.preventDefault();
     opt.e.stopPropagation();
-    var vpt = can.viewportTransform;
-    if(zoom < 0.4) {
-        vpt[4] = 200 - 500 * zoom
-        vpt[5] = 200 - 500 * zoom
-    } else {
-        if(vpt[4] >= 0) {
-            vpt[4] = 0;
-        }
-    }
-
-
-
 }).on("mouse:down", ContextmenuEvent)
 
 .on("mouse:up", function(opt) {
@@ -45,15 +37,15 @@ can.on("mouse:wheel", function(opt) {
         top : top * CellSize
     }).setCoords();
 }).on("mouse:move", function(opt) {
-    if(IsPanning) { 
-        console.log(opt.pointer);
+    var vpt = can.viewportTransform;
+    if(IsPanning && vpt[4] * InverseZoom < 5000) { 
         
         let ev = opt.e;
-        var vpt = can.viewportTransform;
         let dx = ev.clientX - LastClientX;
         let dy = ev.clientY - LastClientY;
-        vpt[4] += dx
-        vpt[5] += dy;
+        
+        vpt[4] = clamp(-1000, vpt[4], 1000) + dx;
+        vpt[5] = clamp(-2500, vpt[5], 2500) + dy;
 
         
 
@@ -63,20 +55,19 @@ can.on("mouse:wheel", function(opt) {
         
     }
 })
+
+
+
+
+
+
+
 function ResizeCanvas() {
     can.setWidth(window.innerWidth);
     can.setHeight(window.innerHeight);
 }
 ResizeCanvas()
-
-
-
-
-
-
-
 let TimerID = undefined
-
 window.addEventListener("resize", ev => {
     if(TimerID) clearTimeout(TimerID);
     TimerID = setTimeout(ResizeCanvas, 500);

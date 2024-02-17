@@ -10,14 +10,13 @@ let ContextMenuIsOver_Element : fabric.Object;
 let ContextMenuIsOver_Name : string;
 let ContextMenuIsOver_PosX = 0;
 let ContextMenuIsOver_PosY = 0;
-
-
-
 let ContextMenu : HTMLElement = document.getElementById("ContextMenu");
 document.addEventListener("contextmenu", (ev : MouseEV) => {
     if(ev.target.parentElement == ContextMenu) ev.preventDefault();
 })
 function ContextmenuEvent(opt : fabric.IEvent<MouseEvent>) {
+    ContextMenuIsOver_PosX = opt.pointer.x
+    ContextMenuIsOver_PosY = opt.pointer.y
     ContextMenuIsOver_Element = opt.target    
     if(opt.e.buttons == 4) {
         opt.e.preventDefault();
@@ -38,7 +37,6 @@ function ContextmenuEvent(opt : fabric.IEvent<MouseEvent>) {
             for(const Action of Actions[ContextMenuIsOver_Name]) {
                 ContextMenu.appendChild(Action[1])  //Actions 1 is the element 
             }
-
         } else {return;}
         
         if(window.innerWidth - ContextMenu.clientWidth - x < 0) {
@@ -75,8 +73,11 @@ function CreateAction(Context : string, name : string, func : (target : fabric.O
     else Actions[Context].push([name, elem]);
 }
 CreateAction("Can","Create Building", (target) => {
+    let offX = Math.ceil((can.viewportTransform[4] - ContextMenuIsOver_PosX) * InverseZoom / CellSize) * CellSize  
+    let offY = Math.ceil((can.viewportTransform[5] - ContextMenuIsOver_PosY) * InverseZoom / CellSize) * CellSize
     let elem = new fabric.Rect({
-        left : -target,
+        left : -offX ,
+        top : -offY,
         width : CellSize,
         height : CellSize,
         lockUniScaling : true,  

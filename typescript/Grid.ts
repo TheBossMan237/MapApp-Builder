@@ -1,11 +1,8 @@
 let GridLineStyle = {stroke : "black", strokeWidth : 5}
 let CellSize = 20;
 
-//@ts-ignore
+
 let GridLimits = new Rect(-1000, -1000, 1000, 1000);
-
-
-
 //@ts-ignore
 can.add(new fabric.Rect({
     top : -1000,
@@ -14,10 +11,8 @@ can.add(new fabric.Rect({
     height : 2000,
     stroke : "black",
     strokeWidth : 10,
-    fill : "transparent",
-    originX : "right",
-    originY : "center",
     selectable : false,
+    fill : "transparent",
     name : "Can" //context menu can click through
 }))
 
@@ -33,7 +28,6 @@ let InfiniteGrid = fabric.util.createClass(fabric.Object, {
         let zoom = can.getZoom();
         let offX = can.viewportTransform[4];
         let offY = can.viewportTransform[5];
-        
         ctx.save();
         ctx.strokeStyle = "#000000"
         ctx.lineWidth = 1;
@@ -63,5 +57,5 @@ let InfiniteGrid = fabric.util.createClass(fabric.Object, {
 })
 
 
-//@ts-ignore
+
 can.add(new InfiniteGrid()); 

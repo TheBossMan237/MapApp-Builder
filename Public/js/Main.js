@@ -29,6 +29,9 @@ class Rect {
 let LastClientX = 0;
 let LastClientY = 0;
 let IsPanning = false;
+let zoom = 1;
+/**`1 / zoom` used for getting the position of thigns with zoom in consideration*/
+let InverseZoom = 1;
 const can = new fabric.Canvas("Can", {
     backgroundColor: "white",
     width: 500,
@@ -39,22 +42,12 @@ const can = new fabric.Canvas("Can", {
 });
 can.on("mouse:wheel", function (opt) {
     var delta = opt.e.deltaY;
-    var zoom = can.getZoom();
     zoom *= .999 ** delta;
+    InverseZoom = 1 / zoom;
     zoom = clamp(0.5, zoom, 2);
     can.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
     opt.e.preventDefault();
     opt.e.stopPropagation();
-    var vpt = can.viewportTransform;
-    if (zoom < 0.4) {
-        vpt[4] = 200 - 500 * zoom;
-        vpt[5] = 200 - 500 * zoom;
-    }
-    else {
-        if (vpt[4] >= 0) {
-            vpt[4] = 0;
-        }
-    }
 }).on("mouse:down", ContextmenuEvent)
     .on("mouse:up", function (opt) {
     if (opt.button == 2)
@@ -67,14 +60,13 @@ can.on("mouse:wheel", function (opt) {
         top: top * CellSize
     }).setCoords();
 }).on("mouse:move", function (opt) {
-    if (IsPanning) {
-        console.log(opt.pointer);
+    var vpt = can.viewportTransform;
+    if (IsPanning && vpt[4] * InverseZoom < 5000) {
         let ev = opt.e;
-        var vpt = can.viewportTransform;
         let dx = ev.clientX - LastClientX;
         let dy = ev.clientY - LastClientY;
-        vpt[4] += dx;
-        vpt[5] += dy;
+        vpt[4] = clamp(-1000, vpt[4], 1000) + dx;
+        vpt[5] = clamp(-2500, vpt[5], 2500) + dy;
         can.requestRenderAll();
         LastClientX = ev.clientX;
         LastClientY = ev.clientY;
@@ -102,6 +94,8 @@ document.addEventListener("contextmenu", (ev) => {
         ev.preventDefault();
 });
 function ContextmenuEvent(opt) {
+    ContextMenuIsOver_PosX = opt.pointer.x;
+    ContextMenuIsOver_PosY = opt.pointer.y;
     ContextMenuIsOver_Element = opt.target;
     if (opt.e.buttons == 4) {
         opt.e.preventDefault();
@@ -164,8 +158,11 @@ function CreateAction(Context, name, func) {
         Actions[Context].push([name, elem]);
 }
 CreateAction("Can", "Create Building", (target) => {
+    let offX = Math.ceil((can.viewportTransform[4] - ContextMenuIsOver_PosX) * InverseZoom / CellSize) * CellSize;
+    let offY = Math.ceil((can.viewportTransform[5] - ContextMenuIsOver_PosY) * InverseZoom / CellSize) * CellSize;
     let elem = new fabric.Rect({
-        left: -target,
+        left: -offX,
+        top: -offY,
         width: CellSize,
         height: CellSize,
         lockUniScaling: true,
@@ -182,7 +179,6 @@ CreateAction("Building", "Enter Building", (target) => {
 });
 let GridLineStyle = { stroke: "black", strokeWidth: 5 };
 let CellSize = 20;
-//@ts-ignore
 let GridLimits = new Rect(-1000, -1000, 1000, 1000);
 //@ts-ignore
 can.add(new fabric.Rect({
@@ -192,10 +188,8 @@ can.add(new fabric.Rect({
     height: 2000,
     stroke: "black",
     strokeWidth: 10,
-    fill: "transparent",
-    originX: "right",
-    originY: "center",
     selectable: false,
+    fill: "transparent",
     name: "Can" //context menu can click through
 }));
 //Credit 
@@ -233,5 +227,4 @@ let InfiniteGrid = fabric.util.createClass(fabric.Object, {
         ctx.restore();
     }
 });
-//@ts-ignore
 can.add(new InfiniteGrid());
