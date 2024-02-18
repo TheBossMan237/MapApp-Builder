@@ -1,29 +1,28 @@
-let LastClientX = 0;
-let LastClientY = 0;
-let IsPanning = false;
-let zoom = 1;
-/**`1 / zoom` used for getting the position of thigns with zoom in consideration*/
-let InverseZoom = 1;
+
+/**Converts the position in the html page and the canvas with respect to zooming/scale */
+function LocalToCanvasPos(x : number, y : number) {
+    return [
+        (can.viewportTransform[4] - x) * InverseZoom ,
+        (can.viewportTransform[5] - y) * InverseZoom 
+    ]
+}
 
 
-
-const can = new fabric.Canvas("Can", {
-    backgroundColor : "white",
-    width : 500,
-    height : 500,
-    stopContextMenu : true,
-    fireRightClick : true,
-    fireMiddleClick : true,
-})
-
+can.add(_ContextMenu)
 can.on("mouse:wheel", function(opt) {
-    var delta = opt.e.deltaY
-    zoom *= .999 ** delta;
+
+    var delta = -clamp(-.1, opt.e.deltaY, .1);
+    zoom = clamp(0.5, zoom + delta, 2)
+    
     InverseZoom = 1 / zoom;
     zoom = clamp(0.5, zoom, 2);
+
     can.zoomToPoint({x : opt.e.offsetX, y : opt.e.offsetY}, zoom)
     opt.e.preventDefault();
     opt.e.stopPropagation();
+    _ContextMenu.width 
+
+
 }).on("mouse:down", ContextmenuEvent)
 
 .on("mouse:up", function(opt) {
@@ -36,13 +35,16 @@ can.on("mouse:wheel", function(opt) {
         left : left * CellSize,
         top : top * CellSize
     }).setCoords();
+    console.log(can.viewportTransform);
+    
 }).on("mouse:move", function(opt) {
     var vpt = can.viewportTransform;
-    if(IsPanning && vpt[4] * InverseZoom < 5000) { 
+    if(IsPanning ) { 
         
         let ev = opt.e;
         let dx = ev.clientX - LastClientX;
         let dy = ev.clientY - LastClientY;
+        console.log(dx);
         
         vpt[4] = clamp(-1000, vpt[4], 1000) + dx;
         vpt[5] = clamp(-2500, vpt[5], 2500) + dy;
@@ -54,6 +56,16 @@ can.on("mouse:wheel", function(opt) {
         LastClientY = ev.clientY; 
         
     }
+}).on("object:scaling", function(opt) {
+
+    let trans = opt.transform
+    let deltaX = 0;
+    //Scaling Up, Down, Left, Right
+    
+    if(trans[1] == "r") deltaX = CellSize
+    else if(trans[1] == "l") deltaX = -CellSize
+    console.log(LocalToCanvasPos);
+    
 })
 
 

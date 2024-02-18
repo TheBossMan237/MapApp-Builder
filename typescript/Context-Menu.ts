@@ -5,17 +5,12 @@ interface MouseEV extends MouseEvent {
 interface I_Actions {
     [TargetName : string | undefined] : [[string, HTMLElement]]
 }
-const Actions : I_Actions = {};
-let ContextMenuIsOver_Element : fabric.Object;
-let ContextMenuIsOver_Name : string;
-let ContextMenuIsOver_PosX = 0;
-let ContextMenuIsOver_PosY = 0;
-let ContextMenu : HTMLElement = document.getElementById("ContextMenu");
+
 document.addEventListener("contextmenu", (ev : MouseEV) => {
     if(ev.target.parentElement == ContextMenu) ev.preventDefault();
 })
 function ContextmenuEvent(opt : fabric.IEvent<MouseEvent>) {
-    ContextMenuIsOver_PosX = opt.pointer.x
+    ContextMenuIsOver_PosX = opt.e.clientX
     ContextMenuIsOver_PosY = opt.pointer.y
     ContextMenuIsOver_Element = opt.target    
     if(opt.e.buttons == 4) {
@@ -73,8 +68,7 @@ function CreateAction(Context : string, name : string, func : (target : fabric.O
     else Actions[Context].push([name, elem]);
 }
 CreateAction("Can","Create Building", (target) => {
-    let offX = Math.ceil((can.viewportTransform[4] - ContextMenuIsOver_PosX) * InverseZoom / CellSize) * CellSize  
-    let offY = Math.ceil((can.viewportTransform[5] - ContextMenuIsOver_PosY) * InverseZoom / CellSize) * CellSize
+    const [offX, offY] = LocalToCanvasPos(ContextMenuIsOver_PosX, ContextMenuIsOver_PosY)
     let elem = new fabric.Rect({
         left : -offX ,
         top : -offY,
